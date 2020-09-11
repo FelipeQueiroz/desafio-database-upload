@@ -4,9 +4,11 @@ import multer from 'multer';
 import { getCustomRepository } from 'typeorm';
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
+import ListTransactionService from '../services/ListTransactionService';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
+import EditTransactionService from '../services/EditTransactionService';
 
 import uploadConfig from '../config/upload';
 
@@ -24,8 +26,17 @@ transactionsRouter.get('/', async (request, response) => {
   return response.json({ transactions, balance });
 });
 
+transactionsRouter.get('/:id', async (request, response) => {
+  const { id } = request.params;
+
+  const listTrasaction = new ListTransactionService();
+
+  const transaction = await listTrasaction.execute(id);
+
+  return response.json(transaction);
+});
+
 transactionsRouter.post('/', async (request, response) => {
-  // TODO
   const { title, type, value, category } = request.body;
 
   const createTransaction = new CreateTransactionService();
@@ -61,5 +72,23 @@ transactionsRouter.post(
     return response.json(transactions);
   },
 );
+
+transactionsRouter.put('/:id', async (request, response) => {
+  const { id } = request.params;
+
+  const { title, value, type, category } = request.body;
+
+  const editTransaction = new EditTransactionService();
+
+  const transaction = await editTransaction.execute({
+    id,
+    title,
+    value,
+    type,
+    category,
+  });
+
+  return response.json(transaction);
+});
 
 export default transactionsRouter;
